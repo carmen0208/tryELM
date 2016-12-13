@@ -2,6 +2,14 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
+-- We need to import the `on` event from Html.Events, and we'll need keyCode
+-- later so let's add it as well.
+import Html.Events exposing (on, keyCode)
+-- We need to use a Json Decoder to extract our keyCode from the `on` event.
+-- For the most part we'll gloss over this for now - there are not many events
+-- where you actually need to use this early on.
+import Json.Decode as Json
+
 type alias Todo =
    { title : String
    , completed : Bool
@@ -48,8 +56,16 @@ initialModel =
 
 update : Msg -> Model -> Model
 update msg model =
-  model
+  case msg of
+    Add todo ->
+      { model | todos = todo :: model.todos }
 
+    Complete todo ->
+      model
+    Delete todo ->
+      model
+    Filter filterState ->
+      model
 -- First we modify the todoView to take a Todo in as its first argument
 todoView : Todo -> Html Msg
 todoView todo =
@@ -65,6 +81,27 @@ todoView todo =
         ]
 
 
+mockTodo : Todo
+mockTodo =
+    { title = "A mock todo..."
+    , completed = False
+    , editing = False
+    }
+
+-- We'll add a function that handles all our keypress events.  For now, any
+-- keypress in the input field will just add a todo, but we'll change this to
+-- just handle enter events - hence the name!
+onEnter : Msg -> Attribute Msg
+onEnter msg =
+  let
+    isEnter code =
+      if code == 13 then
+        Json.succeed msg
+      else
+        Json.fail "not the right keycode"
+  in
+    on "keydown" (keyCode |> Json.andThen isEnter )
+
 view : Model -> Html Msg
 view model =
     div []
@@ -72,7 +109,12 @@ view model =
         , section [ class "todoapp" ]
             [ header [ class "header" ]
                 [ h1 [] [ text "todos" ]
-                , input [ class "new-todo", placeholder "What needs to be done?", autofocus True ] []
+                , input [ class "new-todo"
+                , placeholder "What needs to be done?"
+                , value model.todo.title
+                , autofocus True
+                , onEnter (Add mockTodo)
+                ] []
                 ]
             , section [ class "main" ]
                 [ ul [ class "todo-list" ]
