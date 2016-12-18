@@ -4,7 +4,7 @@ import Html.Attributes exposing (..)
 
 -- We need to import the `on` event from Html.Events, and we'll need keyCode
 -- later so let's add it as well.
-import Html.Events exposing (on, keyCode)
+import Html.Events exposing (on, keyCode, onInput)
 -- We need to use a Json Decoder to extract our keyCode from the `on` event.
 -- For the most part we'll gloss over this for now - there are not many events
 -- where you actually need to use this early on.
@@ -32,34 +32,49 @@ type alias Model =
 
 -- We have the messages that can occur
 type Msg
-     = Add Todo
+     = Add
      | Complete Todo
      | Delete Todo
+     | UpdateField String
      | Filter FilterState
+
+newTodo : Todo
+newTodo =
+  { title = ""
+  , completed = False
+  , editing = False
+
+  }
 
 -- We have the entire application state's model
 initialModel : Model
 initialModel =
     { todos =
-        [ { title = "Mike and Cookies"
-          , completed = True
+        [ { title = "The first todo"
+          , completed = False
           , editing = False
           }
         ]
-    , todo =
-        { title = ""
-        , completed = False
-        , editing = False
-        }
+    , todo = newTodo
     , filter = All
     }
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Add todo ->
-      { model | todos = todo :: model.todos }
-
+    Add ->
+      { model
+          | todos = model.todo :: model.todos
+          , todo = newTodo
+      }
+    UpdateField str ->
+      let
+        todo =
+          model.todo
+        updateTodo =
+          {todo | title = str}
+       in
+        { model | todo = updateTodo }
     Complete todo ->
       model
     Delete todo ->
@@ -113,7 +128,8 @@ view model =
                 , placeholder "What needs to be done?"
                 , value model.todo.title
                 , autofocus True
-                , onEnter (Add mockTodo)
+                , onEnter Add
+                , onInput UpdateField
                 ] []
                 ]
             , section [ class "main" ]
