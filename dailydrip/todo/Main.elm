@@ -106,7 +106,8 @@ update msg model =
               | todos = List.map updateTodo model.todos
           }
     Delete todo ->
-      model
+      -- /= is not equal operator in ELM
+      {model|todos = List.filter (\mappedTodo -> todo.identifier /= mappedTodo.identifier )model.todos}
     Filter filterState ->
       { model | filter = filterState}
 -- First we modify the todoView to take a Todo in as its first argument
@@ -130,7 +131,9 @@ todoView todo =
               ] []
               -- We will use the todo's title as the label text
             , label [] [ text todo.title ]
-            , button [ class "destroy" ] []
+            , button [ class "destroy"
+            , onClick (Delete todo)
+            ] []
             ]
         ]
 
