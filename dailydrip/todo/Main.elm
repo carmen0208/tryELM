@@ -39,6 +39,7 @@ type Msg
      | Delete Todo
      | UpdateField String
      | Filter FilterState
+     | Clear
 
 newTodo : Todo
 newTodo =
@@ -107,9 +108,13 @@ update msg model =
           }
     Delete todo ->
       -- /= is not equal operator in ELM
-      {model|todos = List.filter (\mappedTodo -> todo.identifier /= mappedTodo.identifier )model.todos}
+      {model|todos = List.filter (\mappedTodo -> todo.identifier /= mappedTodo.identifier ) model.todos}
     Filter filterState ->
       { model | filter = filterState}
+    Clear ->
+      { model
+          | todos = List.filter (\todo -> todo.completed == False) model.todos
+      }
 -- First we modify the todoView to take a Todo in as its first argument
 todoView : Todo -> Html Msg
 todoView todo =
@@ -204,7 +209,10 @@ view model =
                         , filterItemView model Active
                         , filterItemView model Completed
                         ]
-                    , button [class "clear-completed"][text "Clear completed"]
+                    , button [class "clear-completed"
+                              , onClick  Clear
+                              ]
+                              [text "Clear completed"]
                     ]
             ]
         ]
