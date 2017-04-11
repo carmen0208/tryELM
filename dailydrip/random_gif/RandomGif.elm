@@ -50,13 +50,11 @@ update msg model =
     -- Cmd that we want to take place - another call to `getRandomGif`
     RequestMore ->
       ( model, getRandomGif model.topic )
-    NewGif result ->
       -- We'll pattern match on the result to handle failure and success
       -- differently.
-      case result of
-        Ok url ->
+    NewGif (Ok url) ->
           ( { model | gifUrl = url }, Cmd.none )
-        Err _ ->
+    NewGif (Err _) ->
           ( model, Cmd.none )
 
 view : Model -> Html Msg
