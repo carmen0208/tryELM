@@ -12,6 +12,12 @@
       var app = Elm.Main.fullscreen();
       // Finally, we'll expose our app as a global variable, which will allow
       // us to manipulate it from the console later.
+      var incrementClickCount = 0;
+      app.ports.increment.subscribe(function() {
+        incrementClickCount += 1;
+        console.log("Increment has been clicked " + incrementClickCount + " times.");
+
+      });
       window.app = app;
       app.ports.jsMsgs.send(1)
       app.ports.jsMsgs.send(1)

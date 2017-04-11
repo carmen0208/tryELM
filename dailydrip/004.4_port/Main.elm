@@ -34,7 +34,7 @@ update msg model =
           | count = model.count + 1
           , increment = model.increment + 1
         }
-      , Cmd.none
+      , increment ()
       )
     Decrement ->
       ({ model
@@ -76,3 +76,5 @@ port jsMsgs : (Int -> msg) -> Sub msg
 -- port jsActions : Signal Int
 subscriptions model =
     jsMsgs mapJsMsg
+
+port increment : () -> Cmd msg
